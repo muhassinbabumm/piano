@@ -1,7 +1,7 @@
 /* Decima piano — offline service worker.
    Bump CACHE when you change any file, so installed copies update. */
 
-var CACHE = "decima-v3";
+var CACHE = "decima-v5";
 
 var PRECACHE = [
   "./",
@@ -11,7 +11,8 @@ var PRECACHE = [
   "./icon-512.png",
   "./icon-maskable-512.png",
   "./apple-touch-icon-180.png",
-  "./favicon-32.png"
+  "./favicon-32.png",
+  "./og-image.png"
 ];
 
 self.addEventListener("install", function(e){
