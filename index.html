@@ -288,8 +288,9 @@
   body.rotated .tray{display:none}
   body.rotated .wordmark{font-size:15px}
 
-  /* the rotate control only earns its space on a phone */
-  @media (min-width:701px){
+  /* hide it only on a true desktop; a phone in landscape can be wider than
+     701px, which was hiding the button on exactly the devices that need it */
+  @media (min-width:701px) and (pointer:fine){
     .rotate{display:none}
   }
 
@@ -344,8 +345,8 @@
   }
 
   @media (max-width:430px){
-    .rotate-label{display:none}
-    .rotate{padding:7px 9px}
+    .rotate{padding:7px 10px;gap:6px}
+    .panel{flex-wrap:wrap;justify-content:flex-end;row-gap:8px}
     .tagline{display:none}
     .wordmark{font-size:15px}
     .fascia{padding:9px 10px 10px}
