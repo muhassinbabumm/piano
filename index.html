@@ -35,7 +35,7 @@
     font-family:"Instrument Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
     font-size:16px;
     display:flex;
-    align-items:center;
+    align-items:flex-start;
     justify-content:center;
     padding:clamp(12px, 3vw, 32px) clamp(10px, 2.5vw, 20px);
     min-height:100%;
@@ -45,7 +45,7 @@
     -webkit-tap-highlight-color:transparent;
   }
 
-  .stage{width:100%;max-width:1000px}
+  .stage{width:100%;max-width:1000px;margin:auto}
 
   /* ---------- the instrument ---------- */
   .piano{
@@ -275,14 +275,18 @@
     .caption p + p{margin-top:6px}
   }
 
-  /* phone held sideways: give the keys the height, drop the reading matter */
+  /* phone held sideways: the keybed takes whatever height is left, so the
+     fascia is always on screen no matter how short the viewport is */
   @media (orientation:landscape) and (max-height:560px){
-    body{padding:8px 10px}
-    .piano{padding:7px}
-    .fascia{padding:7px 12px 8px}
+    body{padding:6px 10px;align-items:stretch}
+    .stage{margin:0 auto;display:flex;flex-direction:column;min-height:0}
+    .piano{flex:1 1 auto;display:flex;flex-direction:column;min-height:0;padding:6px}
+    .fascia{flex:0 0 auto;padding:6px 12px 7px}
+    .felt{flex:0 0 auto}
+    .keys{flex:1 1 auto;height:auto;min-height:92px}
     .tagline{display:none}
-    .wordmark{font-size:15px}
-    .keys{height:min(58vh, 190px)}
+    .wordmark{font-size:14px}
+    .pedal{padding:6px 10px}
     .caption{display:none}
   }
 
