@@ -1,7 +1,7 @@
 /* Decima piano — offline service worker.
    Bump CACHE when you change any file, so installed copies update. */
 
-var CACHE = "decima-v1";
+var CACHE = "decima-v2";
 
 var PRECACHE = [
   "./",
