@@ -4,6 +4,15 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>Decima — ten-key piano</title>
+<link rel="manifest" href="./manifest.webmanifest">
+<meta name="theme-color" content="#22261F">
+<meta name="description" content="A playable ten-key piano. The number row plays the white keys, the letters above them play the sharps.">
+<link rel="icon" href="./favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="./apple-touch-icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Decima">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -247,6 +256,40 @@
     padding:1px 6px;
   }
 
+  .tray{
+    margin:14px 4px 0;
+    display:flex;
+    align-items:center;
+    gap:14px;
+    flex-wrap:wrap;
+  }
+  .tray[hidden]{display:none}
+
+  .install{
+    font-family:inherit;
+    font-size:13.5px;
+    color:var(--ink);
+    background:linear-gradient(180deg,#353A2F,#23281F);
+    border:1px solid #4A5140;
+    border-radius:6px;
+    padding:9px 15px;
+    cursor:pointer;
+    box-shadow:0 1px 0 rgba(255,255,255,.08) inset, 0 2px 0 #0E110C;
+    transition:transform .06s, box-shadow .06s, border-color .12s;
+  }
+  .install:hover{border-color:#6B5A33}
+  .install:active{transform:translateY(2px);box-shadow:0 0 0 #0E110C}
+  .install:focus-visible{outline:2px solid var(--lamp);outline-offset:2px}
+  .install[hidden]{display:none}
+
+  .tray-note{font-size:13px;color:var(--ink-dim);line-height:1.5}
+  .tray-note[hidden]{display:none}
+
+  /* nothing to install once it is running as an app */
+  @media (display-mode:standalone){
+    .tray{display:none}
+  }
+
   @media (max-width:700px){
     .piano{padding:8px;border-radius:8px}
     .fascia{padding:10px 12px 11px;gap:10px}
@@ -288,6 +331,7 @@
     .wordmark{font-size:14px}
     .pedal{padding:6px 10px}
     .caption{display:none}
+    .tray{display:none}
   }
 
   @media (prefers-reduced-motion:reduce){
@@ -319,6 +363,11 @@
   <div class="caption">
     <p>Play with the number row, <kbd>1</kbd> through <kbd>0</kbd>, for the white keys. The black keys sit on the letters just above them: <kbd>q</kbd> <kbd>w</kbd> <kbd>r</kbd> <kbd>t</kbd> <kbd>y</kbd> <kbd>i</kbd> <kbd>o</kbd>. Clicking and tapping work too, and dragging across the keys glides.</p>
     <p>Hold <kbd>space</kbd> to sustain, or press Sustain to keep it on until you press it again.</p>
+  </div>
+
+  <div class="tray" id="tray" hidden>
+    <button class="install" id="install" type="button" hidden>Install as an app</button>
+    <p class="tray-note" id="trayNote" hidden></p>
   </div>
 </main>
 
@@ -653,6 +702,67 @@
     var note = noteFromEvent(e);
     if (note) noteOff(note);
   });
+
+  /* ---------- install as an app ---------- */
+  var tray = document.getElementById("tray");
+  var installBtn = document.getElementById("install");
+  var trayNote = document.getElementById("trayNote");
+  var deferredPrompt = null;
+
+  function installed(){
+    return window.matchMedia("(display-mode: standalone)").matches ||
+           window.navigator.standalone === true;
+  }
+
+  function showNote(text){
+    trayNote.textContent = text;
+    trayNote.hidden = false;
+    tray.hidden = false;
+  }
+
+  // Chrome, Edge, Samsung Internet, Android
+  window.addEventListener("beforeinstallprompt", function(e){
+    e.preventDefault();
+    deferredPrompt = e;
+    installBtn.hidden = false;
+    tray.hidden = false;
+  });
+
+  installBtn.addEventListener("click", function(){
+    if (!deferredPrompt) return;
+    var p = deferredPrompt;
+    deferredPrompt = null;
+    installBtn.hidden = true;
+    p.prompt();
+    p.userChoice.then(function(choice){
+      if (choice.outcome !== "accepted"){
+        deferredPrompt = p;
+        installBtn.hidden = false;
+      }
+    });
+  });
+
+  window.addEventListener("appinstalled", function(){
+    deferredPrompt = null;
+    installBtn.hidden = true;
+    showNote("Installed. Open Decima from your home screen.");
+  });
+
+  // iOS has no install prompt, so tell people where the control lives
+  if (!installed()){
+    var ua = navigator.userAgent;
+    var iOS = /iPad|iPhone|iPod/.test(ua) ||
+              (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    if (iOS && !window.matchMedia("(display-mode: standalone)").matches){
+      showNote("To install on iPhone or iPad: tap Share, then Add to Home Screen.");
+    }
+  }
+
+  if ("serviceWorker" in navigator){
+    window.addEventListener("load", function(){
+      navigator.serviceWorker.register("./sw.js").catch(function(){});
+    });
+  }
 })();
 </script>
 </body>
