@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Decima — ten-key piano</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --room:#22261F;
+    --chassis:#2E332B;
+    --fascia:#1C201A;
+    --walnut:#5A3823;
+    --walnut-hi:#7A4E31;
+    --ivory:#F2EDE1;
+    --ivory-sh:#CFC7B4;
+    --ebony:#191A17;
+    --felt:#8E2436;
+    --lamp:#E8A33D;
+    --ink:#D8D4C6;
+    --ink-dim:#8E9385;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+
+  html,body{height:100%}
+
+  body{
+    background:
+      radial-gradient(120% 90% at 50% 0%, #333A30 0%, var(--room) 55%, #171A15 100%);
+    color:var(--ink);
+    font-family:"Instrument Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-size:16px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:32px 20px;
+    min-height:100%;
+    -webkit-text-size-adjust:100%;
+  }
+
+  .stage{width:100%;max-width:1000px}
+
+  /* ---------- the instrument ---------- */
+  .piano{
+    background:var(--walnut);
+    background-image:linear-gradient(90deg,var(--walnut-hi),var(--walnut) 6%,var(--walnut) 94%,var(--walnut-hi));
+    border-radius:10px;
+    padding:14px;
+    box-shadow:
+      0 1px 0 rgba(255,255,255,.14) inset,
+      0 28px 60px -20px rgba(0,0,0,.75),
+      0 2px 0 rgba(0,0,0,.4);
+  }
+
+  .fascia{
+    background:linear-gradient(180deg,#2A2F27,#1A1E17);
+    border-radius:5px 5px 0 0;
+    padding:14px 18px 15px;
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:16px;
+    flex-wrap:wrap;
+    border-bottom:1px solid #0D0F0C;
+  }
+
+  .wordmark{
+    font-size:22px;
+    font-weight:600;
+    letter-spacing:.14em;
+    color:#EDE7D8;
+    line-height:1;
+  }
+  .tagline{
+    margin-top:6px;
+    font-size:12.5px;
+    color:var(--ink-dim);
+    letter-spacing:.02em;
+  }
+
+  .panel{display:flex;align-items:center;gap:22px;margin-left:auto}
+
+  .readout{
+    min-width:112px;
+    text-align:right;
+    font-variant-numeric:tabular-nums;
+  }
+  .readout b{
+    display:block;
+    font-size:20px;
+    font-weight:500;
+    color:var(--lamp);
+    line-height:1.15;
+    text-shadow:0 0 14px rgba(232,163,61,.45);
+  }
+  .readout span{font-size:12.5px;color:var(--ink-dim)}
+  .readout.idle b{color:#4E5348;text-shadow:none}
+
+  .pedal{
+    display:flex;align-items:center;gap:9px;
+    font-family:inherit;
+    font-size:12.5px;
+    color:var(--ink-dim);
+    background:linear-gradient(180deg,#353A2F,#23281F);
+    border:1px solid #454B3C;
+    border-radius:6px;
+    padding:8px 13px;
+    cursor:pointer;
+    touch-action:manipulation;
+    -webkit-user-select:none;
+    user-select:none;
+    box-shadow:0 1px 0 rgba(255,255,255,.09) inset, 0 2px 0 #0E110C, 0 3px 6px rgba(0,0,0,.4);
+    transition:transform .06s, box-shadow .06s, color .12s, border-color .12s;
+  }
+  .pedal:focus{outline:none}
+  .pedal:focus-visible{outline:2px solid var(--lamp);outline-offset:2px}
+  .lamp{
+    width:11px;height:11px;border-radius:50%;
+    background:#33382E;
+    box-shadow:0 0 0 1px #0D0F0C inset;
+    transition:background .12s, box-shadow .12s;
+  }
+  .pedal.on .lamp{
+    background:var(--lamp);
+    box-shadow:0 0 0 1px #0D0F0C inset, 0 0 12px 2px rgba(232,163,61,.6);
+  }
+  .pedal.on{
+    color:var(--ink);
+    border-color:#6B5A33;
+    transform:translateY(2px);
+    box-shadow:0 2px 7px rgba(0,0,0,.45) inset, 0 0 0 #0E110C;
+  }
+
+  /* crimson keybed felt */
+  .felt{
+    height:7px;
+    background:linear-gradient(180deg,#A62D40,var(--felt) 60%,#5F1724);
+    box-shadow:0 2px 5px rgba(0,0,0,.55) inset;
+  }
+
+  /* ---------- keys ---------- */
+  .keys{
+    position:relative;
+    height:clamp(150px, 30vw, 230px);
+    background:var(--ebony);
+    padding:0 3px 3px;
+    border-radius:0 0 6px 6px;
+    touch-action:none;
+    user-select:none;
+    -webkit-user-select:none;
+    display:flex;
+    gap:2px;
+  }
+
+  .key{
+    font-family:inherit;
+    border:0;
+    padding:0;
+    cursor:pointer;
+    position:relative;
+    display:flex;
+    align-items:flex-end;
+    justify-content:center;
+    touch-action:none;
+  }
+  .key:focus{outline:none}
+  .key:focus-visible{outline:2px solid var(--lamp);outline-offset:-4px}
+
+  .white{
+    flex:1 1 0;
+    background:linear-gradient(180deg,#FFFDF6 0%,var(--ivory) 72%,var(--ivory-sh) 100%);
+    border-radius:0 0 5px 5px;
+    box-shadow:
+      0 -1px 0 rgba(0,0,0,.35) inset,
+      0 -7px 8px -6px rgba(0,0,0,.28) inset,
+      0 3px 0 #9E967F,
+      0 5px 7px rgba(0,0,0,.45);
+    color:#6E6551;
+    font-size:15px;
+    font-weight:500;
+    padding-bottom:14px;
+    transition:background .05s linear, box-shadow .05s linear, transform .05s linear;
+  }
+  .white.on{
+    background:linear-gradient(180deg,#E9E2CF 0%,#DCD4BE 100%);
+    transform:translateY(3px);
+    box-shadow:
+      0 -1px 0 rgba(0,0,0,.35) inset,
+      0 -10px 14px -6px rgba(0,0,0,.3) inset,
+      0 0 0 #9E967F,
+      0 2px 4px rgba(0,0,0,.4);
+    color:#4D4636;
+  }
+
+  .black{
+    position:absolute;
+    top:0;
+    width:6.4%;
+    height:61%;
+    transform:translateX(-50%);
+    background:linear-gradient(180deg,#3A3D36 0%,#1D1F1B 38%,#0E0F0D 100%);
+    border-radius:0 0 4px 4px;
+    box-shadow:
+      0 1px 0 rgba(255,255,255,.18) inset,
+      0 4px 0 #000,
+      0 7px 9px rgba(0,0,0,.6);
+    color:#A9A390;
+    font-size:12px;
+    font-weight:500;
+    padding-bottom:11px;
+    z-index:2;
+    transition:background .05s linear, box-shadow .05s linear, transform .05s linear;
+  }
+  .black.on{
+    background:linear-gradient(180deg,#24261F 0%,#0B0C0A 100%);
+    transform:translateX(-50%) translateY(3px);
+    box-shadow:0 1px 0 rgba(255,255,255,.1) inset, 0 1px 0 #000, 0 3px 5px rgba(0,0,0,.55);
+    color:var(--lamp);
+  }
+
+  /* ---------- caption ---------- */
+  .caption{
+    margin:18px 4px 0;
+    display:flex;
+    justify-content:space-between;
+    gap:18px;
+    flex-wrap:wrap;
+    font-size:13.5px;
+    color:var(--ink-dim);
+    line-height:1.5;
+  }
+  .caption p{max-width:62ch}
+  .caption kbd{
+    font:inherit;
+    color:var(--ink);
+    background:#181C15;
+    border:1px solid #3B4235;
+    border-bottom-width:2px;
+    border-radius:4px;
+    padding:1px 6px;
+  }
+
+  @media (max-width:640px){
+    body{padding:18px 10px}
+    .piano{padding:9px;border-radius:8px}
+    .fascia{padding:11px 12px 12px}
+    .wordmark{font-size:18px}
+    .white{font-size:13px;padding-bottom:10px}
+    .black{font-size:10px;padding-bottom:8px;width:7%}
+    .readout{min-width:88px}
+    .readout b{font-size:17px}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    *{transition:none !important}
+  }
+</style>
+</head>
+<body>
+
+<main class="stage">
+  <div class="piano">
+    <div class="fascia">
+      <div>
+        <div class="wordmark">Decima</div>
+        <div class="tagline">ten-key piano, C4 to E5</div>
+      </div>
+      <div class="panel">
+        <button class="pedal" id="pedal" type="button" aria-pressed="false"><span class="lamp"></span>Sustain</button>
+        <div class="readout idle" id="readout">
+          <b id="readoutNote">—</b>
+          <span id="readoutKey">no note yet</span>
+        </div>
+      </div>
+    </div>
+    <div class="felt"></div>
+    <div class="keys" id="keys"></div>
+  </div>
+
+  <div class="caption">
+    <p>Play with the number row, <kbd>1</kbd> through <kbd>0</kbd>, for the white keys. The black keys sit on the letters just above them: <kbd>q</kbd> <kbd>w</kbd> <kbd>r</kbd> <kbd>t</kbd> <kbd>y</kbd> <kbd>i</kbd> <kbd>o</kbd>. Clicking and tapping work too, and dragging across the keys glides.</p>
+    <p>Hold <kbd>space</kbd> to sustain, or press Sustain to keep it on until you press it again.</p>
+  </div>
+</main>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------- key map ---------- */
+  // white keys: C4 D4 E4 F4 G4 A4 B4 C5 D5 E5  -> 1 2 3 4 5 6 7 8 9 0
+  var WHITE = [
+    {midi:60, name:"C4", label:"1", key:"1"},
+    {midi:62, name:"D4", label:"2", key:"2"},
+    {midi:64, name:"E4", label:"3", key:"3"},
+    {midi:65, name:"F4", label:"4", key:"4"},
+    {midi:67, name:"G4", label:"5", key:"5"},
+    {midi:69, name:"A4", label:"6", key:"6"},
+    {midi:71, name:"B4", label:"7", key:"7"},
+    {midi:72, name:"C5", label:"8", key:"8"},
+    {midi:74, name:"D5", label:"9", key:"9"},
+    {midi:76, name:"E5", label:"0", key:"0"}
+  ];
+  // black keys sit over the gap after the given white index
+  var BLACK = [
+    {after:0, midi:61, name:"C#4", label:"Q", key:"q"},
+    {after:1, midi:63, name:"D#4", label:"W", key:"w"},
+    {after:3, midi:66, name:"F#4", label:"R", key:"r"},
+    {after:4, midi:68, name:"G#4", label:"T", key:"t"},
+    {after:5, midi:70, name:"A#4", label:"Y", key:"y"},
+    {after:7, midi:73, name:"C#5", label:"I", key:"i"},
+    {after:8, midi:75, name:"D#5", label:"O", key:"o"}
+  ];
+
+  /* ---------- build the keybed ---------- */
+  var keysEl = document.getElementById("keys");
+  var byKey = Object.create(null);   // keyboard char -> note descriptor
+  var els = Object.create(null);     // note name -> element
+
+  function makeKey(note, cls, style){
+    var b = document.createElement("button");
+    b.className = "key " + cls;
+    b.type = "button";
+    b.textContent = note.label;
+    b.setAttribute("aria-label", note.name + ", keyboard " + note.label);
+    if (style) b.setAttribute("style", style);
+    b.dataset.note = note.name;
+    keysEl.appendChild(b);
+    els[note.name] = b;
+    byKey[note.key] = note;
+    note.el = b;
+    return b;
+  }
+
+  WHITE.forEach(function(n){ makeKey(n, "white"); });
+  BLACK.forEach(function(n){
+    var left = ((n.after + 1) * 10);
+    makeKey(n, "black", "left:" + left + "%");
+  });
+
+  /* ---------- audio ---------- */
+  var ctx = null, master = null, wetGain = null;
+
+  function makeImpulse(seconds, decay){
+    var rate = ctx.sampleRate;
+    var len = Math.floor(rate * seconds);
+    var buf = ctx.createBuffer(2, len, rate);
+    for (var c = 0; c < 2; c++){
+      var d = buf.getChannelData(c);
+      for (var i = 0; i < len; i++){
+        d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, decay);
+      }
+    }
+    return buf;
+  }
+
+  function initAudio(){
+    if (ctx) { if (ctx.state === "suspended") ctx.resume(); return; }
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    ctx = new AC();
+
+    var comp = ctx.createDynamicsCompressor();
+    comp.threshold.value = -16;
+    comp.knee.value = 22;
+    comp.ratio.value = 4;
+    comp.attack.value = 0.004;
+    comp.release.value = 0.22;
+    comp.connect(ctx.destination);
+
+    master = ctx.createGain();
+    master.gain.value = 0.55;
+    master.connect(comp);
+
+    var verb = ctx.createConvolver();
+    verb.buffer = makeImpulse(1.9, 2.6);
+    wetGain = ctx.createGain();
+    wetGain.gain.value = 0.20;
+    master.connect(wetGain);
+    wetGain.connect(verb);
+    verb.connect(comp);
+  }
+
+  var PARTIALS = [[1,1],[2,0.42],[3,0.20],[4,0.11],[5,0.055],[6,0.028],[8,0.012]];
+
+  function startVoice(midi, velocity){
+    var now = ctx.currentTime;
+    var f = 440 * Math.pow(2, (midi - 69) / 12);
+    var vel = velocity || 0.8;
+
+    var amp = ctx.createGain();
+    amp.gain.setValueAtTime(0, now);
+    amp.gain.linearRampToValueAtTime(vel * 0.42, now + 0.006);
+    amp.connect(master);
+
+    var lp = ctx.createBiquadFilter();
+    lp.type = "lowpass";
+    lp.Q.value = 0.4;
+    lp.frequency.setValueAtTime(Math.min(13000, f * 16 + 900), now);
+    lp.frequency.exponentialRampToValueAtTime(Math.max(420, f * 4.5), now + 1.4);
+    lp.connect(amp);
+
+    // lower strings ring longer, as on a real board
+    var decay = 2.2 + Math.max(0, 76 - midi) * 0.10;
+    var oscs = [];
+
+    PARTIALS.forEach(function(p){
+      var n = p[0], g = p[1];
+      var o = ctx.createOscillator();
+      o.type = "sine";
+      // slight inharmonicity: partials stretch sharp, as with real strings
+      o.frequency.value = f * n * (1 + 0.0005 * n * n);
+      o.detune.value = Math.random() * 5 - 2.5;
+      var pg = ctx.createGain();
+      pg.gain.setValueAtTime(g * vel, now);
+      pg.gain.setTargetAtTime(0.0001, now + 0.004, decay / (3 + n * 1.6));
+      o.connect(pg);
+      pg.connect(lp);
+      o.start(now);
+      oscs.push(o);
+    });
+
+    // hammer thump
+    var nb = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 0.05), ctx.sampleRate);
+    var nd = nb.getChannelData(0);
+    for (var i = 0; i < nd.length; i++){
+      nd[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / nd.length, 3);
+    }
+    var noise = ctx.createBufferSource();
+    noise.buffer = nb;
+    var nf = ctx.createBiquadFilter();
+    nf.type = "bandpass";
+    nf.frequency.value = Math.min(9000, f * 3.2);
+    nf.Q.value = 0.9;
+    var ng = ctx.createGain();
+    ng.gain.value = 0.14 * vel;
+    noise.connect(nf); nf.connect(ng); ng.connect(amp);
+    noise.start(now);
+
+    var stopAt = now + decay * 1.6 + 0.6;
+    oscs.forEach(function(o){ o.stop(stopAt); });
+
+    var voice = { amp: amp, oscs: oscs, dead: false };
+    setTimeout(function(){ killVoice(voice); }, (stopAt - now) * 1000 + 120);
+    return voice;
+  }
+
+  function killVoice(v){
+    if (v.dead) return;
+    v.dead = true;
+    try { v.amp.disconnect(); } catch(e){}
+    v.oscs.forEach(function(o){ try { o.disconnect(); } catch(e){} });
+  }
+
+  function releaseVoice(v){
+    if (!v || v.dead) return;
+    var now = ctx.currentTime;
+    var g = v.amp.gain;
+    if (g.cancelAndHoldAtTime) { g.cancelAndHoldAtTime(now); }
+    else { var cur = g.value; g.cancelScheduledValues(now); g.setValueAtTime(cur, now); }
+    g.setTargetAtTime(0.0001, now, 0.055);
+    v.oscs.forEach(function(o){ try { o.stop(now + 0.45); } catch(e){} });
+    setTimeout(function(){ killVoice(v); }, 600);
+  }
+
+  /* ---------- note handling ---------- */
+  var held = Object.create(null);   // note name -> voice
+  var pedalled = [];                // voices waiting on the pedal
+  var pedalDown = false;
+
+  var readout = document.getElementById("readout");
+  var readoutNote = document.getElementById("readoutNote");
+  var readoutKey = document.getElementById("readoutKey");
+  var pedalEl = document.getElementById("pedal");
+
+  function noteOn(note, velocity){
+    if (held[note.name]) return;
+    initAudio();
+    if (!ctx) return;
+    held[note.name] = startVoice(note.midi, velocity);
+    note.el.classList.add("on");
+    readout.classList.remove("idle");
+    readoutNote.textContent = note.name;
+    readoutKey.textContent = "key " + note.label.toLowerCase();
+  }
+
+  function noteOff(note){
+    var v = held[note.name];
+    if (!v) return;
+    delete held[note.name];
+    note.el.classList.remove("on");
+    if (pedalDown) pedalled.push(v);
+    else releaseVoice(v);
+  }
+
+  function allNotes(){
+    return WHITE.concat(BLACK);
+  }
+
+  var spaceHeld = false;    // space bar, momentary
+  var pedalLatched = false; // on-screen button, latching
+
+  function refreshPedal(){
+    var down = spaceHeld || pedalLatched;
+    pedalEl.classList.toggle("on", down);
+    pedalEl.setAttribute("aria-pressed", down ? "true" : "false");
+    if (pedalDown === down) return;
+    pedalDown = down;
+    if (!down){
+      pedalled.forEach(releaseVoice);
+      pedalled = [];
+    }
+  }
+
+  function setPedal(down){
+    spaceHeld = down;
+    refreshPedal();
+  }
+
+  pedalEl.addEventListener("click", function(){
+    initAudio();
+    pedalLatched = !pedalLatched;
+    refreshPedal();
+  });
+
+  /* ---------- keyboard ---------- */
+  window.addEventListener("keydown", function(e){
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (e.code === "Space"){
+      e.preventDefault();
+      initAudio();
+      setPedal(true);
+      return;
+    }
+    if (e.repeat) return;
+    var note = byKey[e.key.toLowerCase()];
+    if (!note) return;
+    e.preventDefault();
+    noteOn(note, 0.85);
+  });
+
+  window.addEventListener("keyup", function(e){
+    if (e.code === "Space"){ setPedal(false); return; }
+    var note = byKey[e.key.toLowerCase()];
+    if (note) noteOff(note);
+  });
+
+  window.addEventListener("blur", function(){
+    allNotes().forEach(noteOff);
+    setPedal(false);
+  });
+
+  /* ---------- pointer ---------- */
+  var pointerNotes = Object.create(null); // pointerId -> note
+
+  function noteFromEvent(e){
+    var el = e.target.closest ? e.target.closest(".key") : null;
+    if (!el) return null;
+    var name = el.dataset.note;
+    return allNotes().filter(function(n){ return n.name === name; })[0] || null;
+  }
+
+  function velocityFromEvent(e, note){
+    // striking lower on a key plays a touch louder, as the leverage suggests
+    var r = note.el.getBoundingClientRect();
+    var y = (e.clientY - r.top) / r.height;
+    return 0.6 + Math.max(0, Math.min(1, y)) * 0.35;
+  }
+
+  keysEl.addEventListener("pointerdown", function(e){
+    var note = noteFromEvent(e);
+    if (!note) return;
+    e.preventDefault();
+    if (note.el.setPointerCapture) { try { note.el.releasePointerCapture(e.pointerId); } catch(err){} }
+    pointerNotes[e.pointerId] = note;
+    noteOn(note, velocityFromEvent(e, note));
+  });
+
+  keysEl.addEventListener("pointermove", function(e){
+    if (!(e.pointerId in pointerNotes)) return;
+    var target = document.elementFromPoint(e.clientX, e.clientY);
+    var note = target && target.closest ? noteFromEvent({target: target, clientY: e.clientY}) : null;
+    var current = pointerNotes[e.pointerId];
+    if (note === current) return;
+    if (current) noteOff(current);
+    if (note){
+      pointerNotes[e.pointerId] = note;
+      noteOn(note, velocityFromEvent(e, note));
+    } else {
+      delete pointerNotes[e.pointerId];
+    }
+  });
+
+  function endPointer(e){
+    var note = pointerNotes[e.pointerId];
+    if (!note) return;
+    delete pointerNotes[e.pointerId];
+    noteOff(note);
+  }
+  window.addEventListener("pointerup", endPointer);
+  window.addEventListener("pointercancel", endPointer);
+
+  keysEl.addEventListener("contextmenu", function(e){ e.preventDefault(); });
+
+  // focused key played with Enter, for keyboard-only navigation
+  keysEl.addEventListener("keydown", function(e){
+    if (e.key !== "Enter") return;
+    var note = noteFromEvent(e);
+    if (!note || e.repeat) return;
+    noteOn(note, 0.85);
+  });
+  keysEl.addEventListener("keyup", function(e){
+    if (e.key !== "Enter") return;
+    var note = noteFromEvent(e);
+    if (note) noteOff(note);
+  });
+})();
+</script>
+</body>
+</html>
