@@ -30,15 +30,19 @@
   body{
     background:
       radial-gradient(120% 90% at 50% 0%, #333A30 0%, var(--room) 55%, #171A15 100%);
+    background-attachment:fixed;
     color:var(--ink);
     font-family:"Instrument Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
     font-size:16px;
     display:flex;
     align-items:center;
     justify-content:center;
-    padding:32px 20px;
+    padding:clamp(12px, 3vw, 32px) clamp(10px, 2.5vw, 20px);
     min-height:100%;
+    min-height:100dvh;
+    overscroll-behavior:none;
     -webkit-text-size-adjust:100%;
+    -webkit-tap-highlight-color:transparent;
   }
 
   .stage{width:100%;max-width:1000px}
@@ -144,7 +148,7 @@
   /* ---------- keys ---------- */
   .keys{
     position:relative;
-    height:clamp(150px, 30vw, 230px);
+    height:clamp(165px, min(44vw, 42vh), 235px);
     background:var(--ebony);
     padding:0 3px 3px;
     border-radius:0 0 6px 6px;
@@ -243,15 +247,43 @@
     padding:1px 6px;
   }
 
-  @media (max-width:640px){
-    body{padding:18px 10px}
-    .piano{padding:9px;border-radius:8px}
-    .fascia{padding:11px 12px 12px}
-    .wordmark{font-size:18px}
-    .white{font-size:13px;padding-bottom:10px}
-    .black{font-size:10px;padding-bottom:8px;width:7%}
-    .readout{min-width:88px}
-    .readout b{font-size:17px}
+  @media (max-width:700px){
+    .piano{padding:8px;border-radius:8px}
+    .fascia{padding:10px 12px 11px;gap:10px}
+    .wordmark{font-size:17px;letter-spacing:.1em}
+    .tagline{font-size:11.5px;margin-top:4px}
+    .panel{gap:12px}
+    .pedal{padding:7px 11px;font-size:12px}
+    .readout{min-width:80px}
+    .readout b{font-size:16px}
+    .readout span{font-size:11px}
+    .white{font-size:13px;padding-bottom:11px}
+    .black{font-size:10.5px;padding-bottom:8px;width:7.2%}
+    .caption{margin-top:14px;font-size:12.5px;gap:10px}
+    .caption kbd{padding:0 4px}
+  }
+
+  @media (max-width:430px){
+    .tagline{display:none}
+    .wordmark{font-size:15px}
+    .fascia{padding:9px 10px 10px}
+    .keys{padding:0 2px 2px;gap:1.5px}
+    .white{font-size:12px;padding-bottom:9px;border-radius:0 0 4px 4px}
+    .black{width:8%;font-size:9.5px;padding-bottom:7px}
+    .caption{font-size:12px;display:block}
+    .caption p{max-width:none}
+    .caption p + p{margin-top:6px}
+  }
+
+  /* phone held sideways: give the keys the height, drop the reading matter */
+  @media (orientation:landscape) and (max-height:560px){
+    body{padding:8px 10px}
+    .piano{padding:7px}
+    .fascia{padding:7px 12px 8px}
+    .tagline{display:none}
+    .wordmark{font-size:15px}
+    .keys{height:min(58vh, 190px)}
+    .caption{display:none}
   }
 
   @media (prefers-reduced-motion:reduce){
